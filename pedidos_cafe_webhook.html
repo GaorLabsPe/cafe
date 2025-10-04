@@ -300,8 +300,8 @@
     </div>
     
     <script>
-        // ⚠️ IMPORTANTE: Reemplaza esta URL con la URL de tu webhook de n8n
-        const WEBHOOK_URL = 'https://TU-N8N.com/webhook/pedidos-cafe';
+        // ⚠️ IMPORTANTE: URL de tu webhook de n8n
+        const WEBHOOK_URL = 'https://webhook.red51.site/webhook/pedidos-cafe';
         
         const productos = [
             {id: 'prod1', nombre: 'Café Molido 250g', precio: 18},
@@ -393,29 +393,29 @@
                 mostrarDebug('📡 Respuesta status: ' + response.status);
                 
                 if (response.ok) {
-                    const resultado = await response.json();
-                    mostrarDebug('✅ Respuesta exitosa');
+                    // Si el webhook de n8n no devuelve JSON, puede que `await response.json()` falle.
+                    // Si solo esperas un 200 OK, puedes omitir la lectura de JSON si no la necesitas.
+                    // const resultado = await response.json(); 
+                    // mostrarDebug('✅ Respuesta exitosa: ' + JSON.stringify(resultado)); // Si esperas un JSON
+
+                    mostrarDebug('✅ Pedido enviado exitosamente.');
                     mostrarMensaje('¡Pedido enviado exitosamente! Te contactaremos pronto por WhatsApp.', 'exito');
                     document.getElementById('pedidoForm').reset();
                     calcularTotal();
                     setTimeout(() => {
                         debugInfo.style.display = 'none';
-                    }, 3000);
+                        document.getElementById('mensaje').style.display = 'none'; // También oculta el mensaje
+                    }, 5000); // Aumenté el tiempo para que se vea el mensaje de éxito
                 } else {
                     const errorText = await response.text();
                     mostrarDebug('❌ Error del servidor: ' + response.status);
                     mostrarDebug('Detalles: ' + errorText);
-                    mostrarMensaje('Error al enviar el pedido (Código: ' + response.status + '). Verifica que el webhook esté activo.', 'error');
+                    mostrarMensaje('Error al enviar el pedido (Código: ' + response.status + '). Verifica que el webhook esté activo y funcionando correctamente en n8n.', 'error');
                 }
             } catch (error) {
                 mostrarDebug('❌ Error de conexión: ' + error.message);
                 mostrarDebug('Tipo: ' + error.name);
-                
-                if (WEBHOOK_URL.includes('TU-N8N.com')) {
-                    mostrarMensaje('⚠️ Debes configurar la URL del webhook en la línea 282 del código HTML', 'error');
-                } else {
-                    mostrarMensaje('Error de conexión: ' + error.message + '. Verifica que el webhook esté activo en n8n.', 'error');
-                }
+                mostrarMensaje('Error de conexión: ' + error.message + '. Asegúrate de tener conexión a internet o que el webhook esté accesible.', 'error');
             } finally {
                 btnSubmit.disabled = false;
                 btnSubmit.textContent = 'Realizar Pedido';
@@ -428,12 +428,13 @@
             mensaje.className = `mensaje ${tipo}`;
             mensaje.style.display = 'block';
             
-            setTimeout(() => {
-                mensaje.style.display = 'none';
-            }, 5000);
+            // Opcional: Si quieres que el mensaje de error o éxito desaparezca automáticamente
+            // setTimeout(() => {
+            //     mensaje.style.display = 'none';
+            // }, 5000); 
         }
         
-        calcularTotal();
+        calcularTotal(); // Calcular el total inicial al cargar la página
     </script>
 </body>
 </html>
