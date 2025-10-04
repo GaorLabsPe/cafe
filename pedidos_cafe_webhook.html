@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos de Café</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6B4423 0%, #3E2723 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #3E2723;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #6B4423;
+            font-size: 1.1em;
+        }
+        
+        .coffee-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            color: #3E2723;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E0E0E0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #6B4423;
+            box-shadow: 0 0 0 3px rgba(107, 68, 35, 0.1);
+        }
+        
+        .producto-item {
+            background: #F5F5F5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .producto-info {
+            flex: 1;
+        }
+        
+        .producto-nombre {
+            font-weight: 600;
+            color: #3E2723;
+            margin-bottom: 5px;
+        }
+        
+        .producto-precio {
+            color: #6B4423;
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+        
+        .cantidad-input {
+            width: 80px;
+            text-align: center;
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6B4423 0%, #8D6E63 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(107, 68, 35, 0.3);
+        }
+        
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+        
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .mensaje {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .mensaje.exito {
+            background: #C8E6C9;
+            color: #2E7D32;
+            display: block;
+        }
+        
+        .mensaje.error {
+            background: #FFCDD2;
+            color: #C62828;
+            display: block;
+        }
+        
+        .total {
+            background: #FFF3E0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .total-label {
+            color: #6B4423;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .total-monto {
+            color: #3E2723;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .debug-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: #666;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=200&fit=crop" alt="Café">
+            <div class="coffee-icon">☕</div>
+            <h1>Pedidos de Café</h1>
+            <p>Selecciona tus productos favoritos</p>
+        </div>
+        
+        <form id="pedidoForm">
+            <div class="form-group">
+                <label>Nombre Completo *</label>
+                <input type="text" id="nombre" required placeholder="Ingresa tu nombre">
+            </div>
+            
+            <div class="form-group">
+                <label>Teléfono *</label>
+                <input type="tel" id="telefono" required placeholder="Ej: 987654321" pattern="[0-9]{9}">
+            </div>
+            
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="tu@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Dirección de Entrega *</label>
+                <textarea id="direccion" rows="2" required placeholder="Ingresa tu dirección completa"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Selecciona tus Productos</label>
+                
+                <div class="producto-item">
+                    <div class="producto-info">
+                        <div class="producto-nombre">Café Molido 250g</div>
+                        <div class="producto-precio">S/ 18.00</div>
+                    </div>
+                    <input type="number" class="cantidad-input" id="prod1" min="0" value="0" data-precio="18">
+                </div>
+                
+                <div class="producto-item">
+                    <div class="producto-info">
+                        <div class="producto-nombre">Café Molido 500g</div>
+                        <div class="producto-precio">S/ 32.00</div>
+                    </div>
+                    <input type="number" class="cantidad-input" id="prod2" min="0" value="0" data-precio="32">
+                </div>
+                
+                <div class="producto-item">
+                    <div class="producto-info">
+                        <div class="producto-nombre">Café en Grano 250g</div>
+                        <div class="producto-precio">S/ 20.00</div>
+                    </div>
+                    <input type="number" class="cantidad-input" id="prod3" min="0" value="0" data-precio="20">
+                </div>
+                
+                <div class="producto-item">
+                    <div class="producto-info">
+                        <div class="producto-nombre">Café en Grano 500g</div>
+                        <div class="producto-precio">S/ 35.00</div>
+                    </div>
+                    <input type="number" class="cantidad-input" id="prod4" min="0" value="0" data-precio="35">
+                </div>
+                
+                <div class="producto-item">
+                    <div class="producto-info">
+                        <div class="producto-nombre">Café Instantáneo 100g</div>
+                        <div class="producto-precio">S/ 15.00</div>
+                    </div>
+                    <input type="number" class="cantidad-input" id="prod5" min="0" value="0" data-precio="15">
+                </div>
+            </div>
+            
+            <div class="total">
+                <div class="total-label">Total a Pagar:</div>
+                <div class="total-monto" id="totalMonto">S/ 0.00</div>
+            </div>
+            
+            <button type="submit" class="btn-submit" id="btnSubmit">Realizar Pedido</button>
+        </form>
+        
+        <div id="mensaje" class="mensaje"></div>
+        <div id="debugInfo" class="debug-info"></div>
+    </div>
+    
+    <script>
+        // ⚠️ IMPORTANTE: Reemplaza esta URL con la URL de tu webhook de n8n
+        const WEBHOOK_URL = 'https://TU-N8N.com/webhook/pedidos-cafe';
+        
+        const productos = [
+            {id: 'prod1', nombre: 'Café Molido 250g', precio: 18},
+            {id: 'prod2', nombre: 'Café Molido 500g', precio: 32},
+            {id: 'prod3', nombre: 'Café en Grano 250g', precio: 20},
+            {id: 'prod4', nombre: 'Café en Grano 500g', precio: 35},
+            {id: 'prod5', nombre: 'Café Instantáneo 100g', precio: 15}
+        ];
+        
+        const cantidadInputs = document.querySelectorAll('.cantidad-input');
+        cantidadInputs.forEach(input => {
+            input.addEventListener('input', calcularTotal);
+        });
+        
+        function calcularTotal() {
+            let total = 0;
+            cantidadInputs.forEach(input => {
+                const cantidad = parseInt(input.value) || 0;
+                const precio = parseFloat(input.dataset.precio);
+                total += cantidad * precio;
+            });
+            document.getElementById('totalMonto').textContent = `S/ ${total.toFixed(2)}`;
+        }
+        
+        function mostrarDebug(texto) {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML += texto + '<br>';
+            console.log(texto);
+        }
+        
+        document.getElementById('pedidoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btnSubmit');
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML = '';
+            debugInfo.style.display = 'none';
+            
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span class="loading"></span> Enviando...';
+            
+            const productosSeleccionados = [];
+            let total = 0;
+            
+            productos.forEach(prod => {
+                const cantidad = parseInt(document.getElementById(prod.id).value) || 0;
+                if (cantidad > 0) {
+                    productosSeleccionados.push({
+                        producto: prod.nombre,
+                        cantidad: cantidad,
+                        precio_unitario: prod.precio,
+                        subtotal: cantidad * prod.precio
+                    });
+                    total += cantidad * prod.precio;
+                }
+            });
+            
+            if (productosSeleccionados.length === 0) {
+                mostrarMensaje('Por favor selecciona al menos un producto', 'error');
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Realizar Pedido';
+                return;
+            }
+            
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                telefono: document.getElementById('telefono').value,
+                email: document.getElementById('email').value,
+                direccion: document.getElementById('direccion').value,
+                productos: productosSeleccionados,
+                total: total,
+                fecha: new Date().toISOString()
+            };
+            
+            mostrarDebug('🔗 Enviando a: ' + WEBHOOK_URL);
+            mostrarDebug('📦 Productos: ' + productosSeleccionados.length);
+            mostrarDebug('💰 Total: S/ ' + total.toFixed(2));
+            
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+                
+                mostrarDebug('📡 Respuesta status: ' + response.status);
+                
+                if (response.ok) {
+                    const resultado = await response.json();
+                    mostrarDebug('✅ Respuesta exitosa');
+                    mostrarMensaje('¡Pedido enviado exitosamente! Te contactaremos pronto por WhatsApp.', 'exito');
+                    document.getElementById('pedidoForm').reset();
+                    calcularTotal();
+                    setTimeout(() => {
+                        debugInfo.style.display = 'none';
+                    }, 3000);
+                } else {
+                    const errorText = await response.text();
+                    mostrarDebug('❌ Error del servidor: ' + response.status);
+                    mostrarDebug('Detalles: ' + errorText);
+                    mostrarMensaje('Error al enviar el pedido (Código: ' + response.status + '). Verifica que el webhook esté activo.', 'error');
+                }
+            } catch (error) {
+                mostrarDebug('❌ Error de conexión: ' + error.message);
+                mostrarDebug('Tipo: ' + error.name);
+                
+                if (WEBHOOK_URL.includes('TU-N8N.com')) {
+                    mostrarMensaje('⚠️ Debes configurar la URL del webhook en la línea 282 del código HTML', 'error');
+                } else {
+                    mostrarMensaje('Error de conexión: ' + error.message + '. Verifica que el webhook esté activo en n8n.', 'error');
+                }
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Realizar Pedido';
+            }
+        });
+        
+        function mostrarMensaje(texto, tipo) {
+            const mensaje = document.getElementById('mensaje');
+            mensaje.textContent = texto;
+            mensaje.className = `mensaje ${tipo}`;
+            mensaje.style.display = 'block';
+            
+            setTimeout(() => {
+                mensaje.style.display = 'none';
+            }, 5000);
+        }
+        
+        calcularTotal();
+    </script>
+</body>
+</html>
